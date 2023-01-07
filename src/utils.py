@@ -1,7 +1,13 @@
+import logging
 from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+class Logger:
+    def __init__(self, name: str):
+        self.logger = logging.getLogger(__name__ + "." + name)
 
 
 class Singleton(type):

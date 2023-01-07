@@ -1,34 +1,52 @@
-"""Configuração do aplicação Flask."""
-from typing import Type
-
+"""
+Configuração do aplicação Flask.
+"""
+import logging
+from distutils.util import strtobool
 from dotenv import load_dotenv
 from src.utils import BASE_DIR, Singleton
-import os
-
-# Para manipulação de variáveis ambiente.
-load_dotenv(dotenv_path=os.path.join(BASE_DIR, '.env'))
+from os.path import exists, join
+from os import getenv
 
 
-class Setting(metaclass=Singleton):
-    """Set Flask configurações o arquivo .env."""
+class Env(metaclass=Singleton):
+    """
+    Class para c
+    """
+    _dotenv_path = join(BASE_DIR, '.env')
+    _debug: bool = True
 
-    # General Config
-    SECRET_KEY = os.getenv('SECRET_KEY')
-    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 1)
-    FLASK_APP = os.getenv('FLASK_APP')
+    def __init__(self):
+        """
+        Get informações sobre o arquivo .env
+        """
+        load_dotenv(dotenv_path=self._dotenv_path)
+        if exists(self._dotenv_path):
+            self.SECRET_KEY = getenv('SECRET_KEY', "")
+            self.FLASK_DEBUG = getenv('FLASK_DEBUG', "1")
+            self._debug = bool(strtobool(self.FLASK_DEBUG))
+            self.FLASK_APP = getenv('FLASK_APP', "")
+            self.__to_verify()
+        else:
+            raise FileNotFoundError("Arquivo .env não encontrado, crie um arquivo na raiz do projeto.")
+
+    def __to_verify(self):
+        if not self._debug:
+            if len(self.SECRET_KEY) == 0:
+                raise ValueError("A secret key não pode ser vazia, inclua uma secret key.")
+        if len(self.FLASK_APP) == 0:
+            raise ValueError("A variável FLASK_APP não pode ser vazio. Inclua um arquivo.")
+
+    def debug_is_enabled(self) -> bool:
+        """
+        Verifica se DEBUG está habilitado no env
+        :return: bool
+        """
+        return self._debug
 
 
-class SettingTest(metaclass=Singleton):
-    """Set Flask configuration from .env file."""
-    """""TESTING"""
-    TESTING = "testing"
+class Settings(Env):
 
-    # General Config
-    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 1)
-    SECRET_KEY = os.getenv("SECRET_KEY", TESTING)
-    FLASK_APP = os.getenv('FLASK_APP', "app.py")
-
-
-def get_config(testing: bool = False) -> Type[SettingTest | Setting]:
-    """Retorna o ambiente de configuração para o Flask."""
-    return SettingTest if testing else Setting
+    def __init__(self):
+        Env.__init__(self)
+        logging.basicConfig(level=logging.DEBUG if self._debug else logging.INFO)

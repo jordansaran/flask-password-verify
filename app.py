@@ -1,8 +1,9 @@
 """
 Executa aplicação Flask
-OBS: Este arquivo serve referência para o arquivo .env
+OBS: Este arquivo serve de referência para o arquivo .env
 """
-from src import create_app
+from src.app import App
 
-
-app = create_app()
+if __name__ == "__main__":
+    app = App()
+    app.run()
