@@ -3,10 +3,10 @@ services:
   web:
     container_name: flask-verify
     build: .
-    command: flask run --host=0.0.0.0
+    command: python app.py
     volumes:
       - .:/usr/src/app/
     ports:
-      - 5001:5000
+      - 5001:5001
     env_file:
       - ./.env

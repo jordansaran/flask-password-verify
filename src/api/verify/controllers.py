@@ -6,9 +6,10 @@ from re import Match
 
 from src.api.verify.constants import ConstVerify
 from src.api.verify.dataclasses import DcVerification, DcRule
+from src.utils import Logger
 
 
-class RulesRegexController:
+class RulesRegexController(Logger):
     """
     Realiza a aplicação dos regex para validar o password.
     :param SEP: str - variável responsável por determinar um caracter de separação. O caracter é ponto e vírgula(;)
@@ -18,14 +19,16 @@ class RulesRegexController:
     """
 
     SEP = ';'
-    __rules: list[DcRule]
-    __dict_rules_regex: dict
+    __rules: list[DcRule] = []
+    __dict_rules_regex: dict = {}
 
     def __init__(self, rules: list[DcRule] = None):
         """
         :param rules: list[DcRules] contém um objeto de dataclass DcRule que possui
         a regra e valor para validar o password
         """
+        Logger.__init__(self, name=self.__class__.__name__)
+        self.logger.info(f"Criação do init {self.__class__.__name__}")
         self.__rules = rules
         self.__creating_dict_rules_regex()
 
@@ -34,6 +37,7 @@ class RulesRegexController:
         Inserindo dados na variável dict_rules_regex.
         :return: None
         """
+        self.logger.info("Set variável dict_rule_regex")
         self.__dict_rules_regex = {
             'minSize': {
                 'regex': r"""[a-zA-z0-9!@#$%^&*()\-+\\/{}\[\]]{;,}""",
@@ -77,6 +81,7 @@ class RulesRegexController:
         :param value: int = 0 (Passa o valor mínimo de repetições que o regex necessita)
         :return: Match[str] | None
         """
+        self.logger.debug(f"Precisa de limite -> {need_value}")
         if need_value:
             # Caso o regex necessita de um valor mínimo de repetições já partimos do presuposto que o regex internamente
             # possui o valor da variável "SEP", neste caso (;) e esse valor é subistuído pelo valor da variável "value"
@@ -91,10 +96,13 @@ class RulesRegexController:
         """
         list_verify: list[str] = []
         for rule in self.__rules:
+            self.logger.debug(f"Regra {rule}")
             # Verifica se no dicionário existe a respectiva regra que será utilizada para realizar a validação do
             # password caso ela existe a regra é aplicada ao password a partir do método is_match()
             rule_regex = self.__dict_rules_regex.get(rule.rule)
+            self.logger.debug(f"rule_regex -> {rule_regex}")
             if rule_regex is not None:
+                self.logger.debug(f"rule_regex é {rule_regex}")
                 # Caso a regra aplicada no password sejá None significa que o password não é válido para aquela regra
                 # que foi utilizada para avaliar ele, sendo assim, o nome dessa regra é guardo em lista que recebe o
                 # apenas o tipo string
@@ -102,16 +110,23 @@ class RulesRegexController:
                                    regex=rule_regex.get('regex'),
                                    need_value=rule_regex.get('need_value'),
                                    value=rule.value) is None:
+                    self.logger.debug(f"is_match -> True")
                     list_verify.append(rule.rule)
+                self.logger.debug(f"is_match -> False")
         return list_verify
 
 
-class VerificationController:
+class VerificationController(Logger):
+    """
+    Contém as regras
+    """
 
     __dc_verification: DcVerification | None
     __rules_regex_controller: RulesRegexController
 
     def __init__(self, payload: dict = None):
+        Logger.__init__(self, name=self.__class__.__name__)
+        self.logger.info(f"Set init {self.__class__.__name__}")
         if payload is not None:
             self.__dc_verification = DcVerification(password=payload.get(ConstVerify.PASSWORD),
                                                     rules=payload.get(ConstVerify.RULES))

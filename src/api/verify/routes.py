@@ -2,25 +2,12 @@
 API endpoint definido para /verify namespace.
 """
 from http import HTTPStatus
-from flask_restx import Resource, fields
+from flask_restx import Resource, marshal
 
 from src.api.verify.controllers import VerificationController
 from src.api.verify.namespaces import NsVerify
 
 ns_verify = NsVerify().get_namespace()
-
-match_model = ns_verify.model('Match', {
-    'verify': fields.String(required=True),
-    'noMatch': fields.List(fields.String)
-})
-rule_model = ns_verify.model('Rule', {
-            'rule': fields.String(required=True),
-            'value': fields.Integer(min=0, required=True)
-        })
-validation_model = ns_verify.model('Validation', {
-    'password': fields.String(required=True),
-    'rules': fields.List(fields.Nested(rule_model))
-})
 
 
 @ns_verify.route("", endpoint='verify')
@@ -30,9 +17,12 @@ validation_model = ns_verify.model('Validation', {
 class Verify(Resource):
     """ Handles HTTP requests to URL: /verify """
 
-    @ns_verify.doc(body=validation_model)
+    @ns_verify.doc(body=ns_verify.models.get("Verify"))
     @ns_verify.response(int(HTTPStatus.OK), 'Retorna se o password é válido, caso não, '
-                                            'retorna as regras que não foram válidas para o password', match_model)
+                                            'retorna as regras que não foram válidas para o password',
+                        ns_verify.models.get("Match"))
     def post(self):
         """ Verificar password. """
-        return VerificationController(payload=ns_verify.payload).execute()
+        ns_verify.logger.info("Verificação de password executado com sucesso.")
+        return marshal(VerificationController(payload=ns_verify.payload).execute(), ns_verify.models.get("Match")),\
+            int(HTTPStatus.OK)
