@@ -37,3 +37,6 @@ class App(Logger):
                            port=self.__PORT)
         else:
             self.__app.run(host="0.0.0.0", port=self.__PORT)
+
+    def get_app(self):
+        return self.__app

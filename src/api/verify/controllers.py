@@ -2,7 +2,6 @@
 Controllers(business role logic) Regras de negócio da API de validação de password
 """
 import re
-from re import Match
 
 from src.api.verify.constants import ConstVerify
 from src.api.verify.dataclasses import DcVerification, DcRule
@@ -18,7 +17,6 @@ class RulesRegexController(Logger):
     de repetições que um caracter ou conjunto de caracteres deve existir no regex.
     """
 
-    SEP = ';'
     __rules: list[DcRule] = []
     __dict_rules_regex: dict = {}
 
@@ -40,19 +38,19 @@ class RulesRegexController(Logger):
         self.logger.info("Set variável dict_rule_regex")
         self.__dict_rules_regex = {
             'minSize': {
-                'regex': r"""[a-zA-z0-9!@#$%^&*()\-+\\/{}\[\]]{;,}""",
+                'regex': r"[a-zA-z0-9!@#$%^&*()\-+\\/{}\[\]]",
                 'need_value': True
             },
             'minUppercase': {
-                'regex': r"[A-Z]{;,}",
+                'regex': r"[A-Z]",
                 'need_value': True
             },
             'minDigit': {
-                'regex': r"[\d+]{;,}",
+                'regex': r"\d",
                 'need_value': True
             },
             'minLowercase': {
-                'regex': r"[a-z]{;,}",
+                'regex': r"[a-z]",
                 'need_value': True
             },
             'noRepeted': {
@@ -60,7 +58,7 @@ class RulesRegexController(Logger):
                 'need_value': False
             },
             'minSpecialChars': {
-                'regex': r"[!@#$%^&*()\-+\\/{}\[\]]{;,}",
+                'regex': r"[!@#$%^&*()\-+\\/{}\[\]]",
                 'need_value': True
             }
         }
@@ -70,7 +68,7 @@ class RulesRegexController(Logger):
                    regex: str = None,
                    need_value: bool = False,
                    value: int = 0
-                   ) -> Match[str] | None:
+                   ) -> bool:
         """
         Valida se o password é valído a partir de um regex, caso ele sejá valído ele retorna None, caso contrário ele
         retorna um objeto Match contém os pontos que o regex encontrou
@@ -83,10 +81,8 @@ class RulesRegexController(Logger):
         """
         self.logger.debug(f"Precisa de limite -> {need_value}")
         if need_value:
-            # Caso o regex necessita de um valor mínimo de repetições já partimos do presuposto que o regex internamente
-            # possui o valor da variável "SEP", neste caso (;) e esse valor é subistuído pelo valor da variável "value"
-            return re.search(regex.replace(self.SEP, str(value)), password)
-        return re.search(regex, password)
+            return bool(len(re.findall(regex, password)) >= value)
+        return bool(re.search(regex, password) is not None)
 
     def to_verify_rules(self, password: str = None) -> list[str]:
         """
@@ -106,10 +102,10 @@ class RulesRegexController(Logger):
                 # Caso a regra aplicada no password sejá None significa que o password não é válido para aquela regra
                 # que foi utilizada para avaliar ele, sendo assim, o nome dessa regra é guardo em lista que recebe o
                 # apenas o tipo string
-                if self.__is_match(password=password,
-                                   regex=rule_regex.get('regex'),
-                                   need_value=rule_regex.get('need_value'),
-                                   value=rule.value) is None:
+                if not self.__is_match(password=password,
+                                       regex=rule_regex.get('regex'),
+                                       need_value=rule_regex.get('need_value'),
+                                       value=rule.value):
                     self.logger.debug(f"is_match -> True")
                     list_verify.append(rule.rule)
                 self.logger.debug(f"is_match -> False")
