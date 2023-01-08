@@ -17,7 +17,7 @@ ns_verify = NsVerify().get_namespace()
 class Verify(Resource):
     """ Handles HTTP requests to URL: /verify """
 
-    @ns_verify.doc(body=ns_verify.models.get("Verify"))
+    @ns_verify.expect(ns_verify.models.get("Verify"), validate=True)
     @ns_verify.response(int(HTTPStatus.OK), 'Retorna se o password é válido, caso não, '
                                             'retorna as regras que não foram válidas para o password',
                         ns_verify.models.get("Match"))
