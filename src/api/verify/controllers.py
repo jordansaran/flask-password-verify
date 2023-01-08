@@ -2,7 +2,6 @@
 Controllers(business role logic) Regras de negócio da API de validação de password
 """
 import re
-from re import Match
 
 from src.api.verify.constants import ConstVerify
 from src.api.verify.dataclasses import DcVerification, DcRule
