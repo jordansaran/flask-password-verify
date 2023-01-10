@@ -1,8 +1,50 @@
-# flask-password-verify
+# Flask password verify
+
+<p align="center">
+    <a href="https://github.com/jordansaran/flask-password-verify/actions">
+      <img alt="Tests Passing" src="https://github.com/jordansaran/flask-password-verify/actions/workflows/python-app.yml/badge.svg" />
+    </a>
+</p>
+
 
 Foi desenvolvido uma API onde seu objetivo é verificar se um password é válido a partir de um conjunto de regras.
 O padrão de comunicação é via JSON, onde a API recebe como entrada um JSON seguindo a seuginte estrutura.
-
+# Instalação
+Certifique-se de utilizar a última versão do código fonte, que normalmente fica na branch "main"(principal) do Git.
+````shell
+# clone o repositório
+$ git clone https://github.com/jordansaran/flask-password-verify
+$ cd flask-password-verify
+````
+Crie um virtualenv em ambiente Unix e ative-o:
+````shell
+$ python3 -m venv venv
+$ . venv/bin/activate
+````
+Ou no Windows cmd:
+````shell
+$ py -3 -m venv venv
+$ venv\Scripts\activate.bat
+````
+Instalando flask-password-verify
+````shell
+$ pip install -r requirements.txt
+````
+# Executar aplicação
+````shell
+$ python app.py
+````
+Abra http://127.0.0.1:5001/api/v1/ui em seu navegador para acessar a documentação da API.
+# Teste
+````shell
+$ python pytest
+````
+Executar com coverage report:
+````shell
+$ coverage run -m pytest
+$ coverage report
+$ coverage html  # abrir htmlcov/index.html em um navegador
+````
 ````
 {
     "password": "TesteSenhaForte!123&",
@@ -18,7 +60,7 @@ O padrão de comunicação é via JSON, onde a API recebe como entrada um JSON s
         },
         {
             "rule": "minDigit", "value": 4
-        }
+        }¡
     ]
 }
 ````
